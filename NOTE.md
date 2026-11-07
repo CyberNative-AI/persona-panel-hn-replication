@@ -73,7 +73,7 @@ scored above F in both stages (descriptive).
 ## Addendum, November 2026: matched-question control
 
 Arm P changed two things: ten personas, and a different question (wish to click and upvote, 1–10, not N's probability
-of 50 points, 0–100). After publication, a reader suggested separating them. Arm G asks P's question
+of 50 points, 0–100). After publication, Alexandre Cristovão Maiorano, the preprint's author, suggested separating them. Arm G asks P's question
 verbatim of "a typical Hacker News reader", without persona or "Staying in character": ten runs per batch, averaged,
 on P's batches, tools, limits and model. Prompt, job layout, scorer and reading rule were committed before any arm-G
 output; all 100 jobs were valid.

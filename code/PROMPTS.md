@@ -17,7 +17,7 @@ You are {persona}. Read /work/items.json. It lists {n} submissions you see on th
 
 ## Arm G (addendum: generic reader, P question, no persona), 10 independent runs per batch, scores averaged
 
-Added after publication at a reader's suggestion; prompt frozen before any arm-G output.
+Added after publication at the suggestion of Alexandre Cristovão Maiorano, author of arXiv:2609.25010; prompt frozen before any arm-G output.
 
 ```text
 You are a typical Hacker News reader. Read /work/items.json. It lists {n} submissions you see on the Hacker News /newest page; each has an id, its title, and the site shown next to the title. Rate from 1 to 10 how likely you personally would be to click the submission and upvote it. Use only your own judgment: do not look anything up. Write /work/scores.json: one JSON object mapping every id (string) to an integer from 1 to 10. Include all {n} ids. Write nothing else.
