@@ -15,17 +15,27 @@ Read /work/items.json. It lists {n} submissions to Hacker News; each has an id, 
 You are {persona}. Read /work/items.json. It lists {n} submissions you see on the Hacker News /newest page; each has an id, its title, and the site shown next to the title. Staying in character, rate from 1 to 10 how likely you personally would be to click the submission and upvote it. Use only your own judgment: do not look anything up. Write /work/scores.json: one JSON object mapping every id (string) to an integer from 1 to 10. Include all {n} ids. Write nothing else.
 ```
 
+## Arm G (addendum: generic reader, P question, no persona), 10 independent runs per batch, scores averaged
+
+Added after publication at a reader's suggestion; prompt frozen before any arm-G output.
+
+```text
+You are a typical Hacker News reader. Read /work/items.json. It lists {n} submissions you see on the Hacker News /newest page; each has an id, its title, and the site shown next to the title. Rate from 1 to 10 how likely you personally would be to click the submission and upvote it. Use only your own judgment: do not look anything up. Write /work/scores.json: one JSON object mapping every id (string) to an integer from 1 to 10. Include all {n} ids. Write nothing else.
+```
+
 ## Layout
 
-- Items: stage 1 = 500 items, stage 2 = 482 items, shuffled once with seed 174570 before any run and cut into batches
-  of 100 in that order. The item order and batch assignment are not part of this release (they would identify HN
-  items), so the job layout cannot be rebuilt from the released files; the scores are released per run and persona.
+- Items: stage 1 = 500 items, stage 2 = 482 items, listed in pair order (hit, miss), shuffled once before any run
+  (seed 174570 for stage 1, 174590 for stage 2) and cut into batches of 100 in that order. Correction (addendum): the
+  first release said 174570 for both stages and that the batch assignment would identify HN items. With the released
+  opaque item keys it does not: the assignment follows from pair order and seed alone. It is now in `../data/batches.csv`,
+  and every job's model, CLI version and settings are in `../data/jobs.csv`.
 - Each job got one batch as `/work/items.json`: a JSON list of `{"id", "title", "site"}`, reshuffled per job with
   `random.Random(f"{tag}/{job}").shuffle(order)` where tag is `main` (stage 1), `s2` (stage 2 first-seen titles)
-  or `s2cur` (stage 2 current titles) and job is e.g. `N-r1-b3` or `P-p7-b3`.
+  or `s2cur` (stage 2 current titles) and job is e.g. `N-r1-b3`, `P-p7-b3` or `G-g7-b3`.
 - Each job was one non-interactive model session with only file Read and Write tools (no shell, no web search);
   inference ran on the vendor's hosted service, 900 s timeout. Output had to be a JSON object with every id mapped to an integer in range;
-  up to 3 attempts per job, otherwise missing. All 65 (stage 1) and 80 (stage 2) jobs were valid; none missing.
+  up to 3 attempts per job, otherwise missing. All 65 (stage 1) and 80 (stage 2) jobs were valid; none missing. Arm G: all 100 jobs valid, none missing.
 - Title and site are built by `common.py` `shown()`: trailing "(2019)", "[pdf]", "[video]" tags removed; site = URL host
   without "www.", or "(text post on news.ycombinator.com)".
 - Arm F: `features.py` (fit on 1,500 pre-period pairs, 2026-03-01..06-15, seed 17458); weights in `../data/armF-model.json`.

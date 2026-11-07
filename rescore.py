@@ -1,4 +1,4 @@
-"""Recompute the NOTE.md table, the 50-99 band figures and the raw stage-2 title-change figures from the scores-only CSVs
+"""Recompute the NOTE.md table (including the arm-G addendum), the 50-99 band figures and the raw stage-2 title-change figures from the scores-only CSVs
 (stdlib, no network; no HN IDs, times, points or titles). Capture timings and tag-removed title figures are not
 reproducible from this release.
 
@@ -55,16 +55,20 @@ def score(stage, arms, diffs):
                                 "misses": sum(p["miss_retitled"] == "True" for p in pairs) / n}
     return res
 
-out = {"s1": score("s1", {"N": "N_mean", "P": "P_mean", "F": "F"}, {"N-F": ("N", "F"), "P-N": ("P", "N")}),
-       "s2": score("s2", {"N": "N_mean", "P": "P_mean", "F": "F", "Ncur": "Ncur_mean"},
-                   {"N-F": ("N", "F"), "P-N": ("P", "N"), "Ncur-N": ("Ncur", "N")})}
+# Addendum (arm G, generic reader with the P question): G-P primary, N-G secondary. Adding arms draws no extra random
+# numbers, so every pre-addendum value is unchanged.
+out = {"s1": score("s1", {"N": "N_mean", "P": "P_mean", "F": "F", "G": "G_mean"},
+                   {"N-F": ("N", "F"), "P-N": ("P", "N"), "G-P": ("G", "P"), "N-G": ("N", "G")}),
+       "s2": score("s2", {"N": "N_mean", "P": "P_mean", "F": "F", "Ncur": "Ncur_mean", "G": "G_mean"},
+                   {"N-F": ("N", "F"), "P-N": ("P", "N"), "Ncur-N": ("Ncur", "N"), "G-P": ("G", "P"), "N-G": ("N", "G")})}
 print(json.dumps(out, indent=1))
 
 # Cross-check against the frozen result files when run inside the workbench.
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-frozen = {"s1": ROOT / "runs/main-result.json", "s2": ROOT / "stage2/s2/result.json"}
+frozen = [("s1", ROOT / "runs/main-result.json"), ("s2", ROOT / "stage2/s2/result.json"),
+          ("s1", ROOT / "runs/G-result-s1.json"), ("s2", ROOT / "runs/G-result-s2.json")]
 bad = 0
-for st, f in frozen.items():
+for st, f in frozen:
     if not f.exists(): continue
     ref = json.loads(f.read_text())
     for k, v in out[st].items():

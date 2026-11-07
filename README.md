@@ -7,8 +7,9 @@ arXiv:2609.25010. `NOTE.md` is the note text.
 
 The study pairs a Hacker News story that reached 50 or more points with one that got 3 or fewer and was posted within an
 hour of it. It then asks whether a model scores the hit above its pair more often when asked plainly (arm N) or when
-playing ten Hacker News readers (arm P). A non-LLM features baseline (arm F) is the third arm. It is an easy contrast,
-not a test of two headlines for one story. Read the note's "Read this first" list before using any number.
+playing ten Hacker News readers (arm P). A non-LLM features baseline (arm F) is the third arm. A November 2026 addendum
+adds arm G: P's question asked of a generic reader with no persona, to separate the personas from the change of
+question (result: inconclusive). It is an easy contrast, not a test of two headlines for one story. Read the note's "Read this first" list before using any number.
 
 ## Run
 
@@ -17,11 +18,11 @@ python3 -I rescore.py            # reads ./data; Python 3.12, standard library o
 ```
 
 `rescore.py` prints JSON with the note's results table (pair accuracy and 95% pair-bootstrap intervals for N, P and F,
-and the N − F and P − N differences, for both stages), the 50–99-point band figures, and the raw stage-2 title-change
-figures. The bootstrap seeds are fixed, so a rerun prints the same numbers.
+and the N − F and P − N differences, for both stages), the addendum's arm-G figures (G, G − P and N − G, both stages),
+the 50–99-point band figures, and the raw stage-2 title-change figures. The bootstrap seeds are fixed, so a rerun prints
+the same numbers; adding arm G draws no extra random numbers, so every earlier figure is unchanged.
 
-It does not rebuild capture timings, the tag-removed title figures or the item order. Those come from evidence we do not
-release.
+It does not rebuild capture timings or the tag-removed title figures. Those come from evidence we do not release.
 
 ## Files
 
@@ -30,11 +31,15 @@ release.
 - `data/pairs.csv`: one row per pair: stage (`s1`, `s2`), pair number, the hit and miss item keys, the hit's points band
   (`50-99`, `100+`) and, for stage 2, whether the hit's or miss's title had changed by 4 November 2026.
 - `data/scores.csv`: one row per item: the F score; the three N runs and their mean; the ten persona ratings and their
-  mean; and, for stage 2, three N runs on current titles (`Ncur`) and their mean. Item keys are our own
-  (`s1-0-hit`, `s1-0-miss`, ...).
+  mean; for stage 2, three N runs on current titles (`Ncur`) and their mean; and the ten arm-G runs and their mean.
+  Item keys are our own (`s1-0-hit`, `s1-0-miss`, ...).
+- `data/batches.csv`: each item's position in its stage's shuffled order and its batch (0–4). It follows from the pair
+  order and the shuffle seeds in `code/PROMPTS.md` alone.
+- `data/jobs.csv`: one row per model job (arms N, P, G and, for stage 2, `Ncur`): batch, attempts, final session id,
+  model, CLI version, fast mode, permission mode and effort setting.
 - `data/personas.json`: the ten persona strings used in arm P.
 - `data/armF-model.json`: the fitted weights of the features baseline.
-- `code/PROMPTS.md`: the verbatim prompts, seeds and job layout of both model arms.
+- `code/PROMPTS.md`: the verbatim prompts, seeds and job layout of the three model arms (N, P, G).
 - `code/common.py`, `code/features.py`: how pairs were built and how arm F was fitted. They read Hacker News records
   that this repository does not contain, so they document the method; they do not run from this repository alone.
 
@@ -47,8 +52,9 @@ title-change flags.
 ## Limits
 
 - One model (Claude Opus 5.5, vendor-hosted inference), one set of ten personas, one venue.
-- The two model arms ask different questions (probability of reaching 50 points vs each persona's wish to click and
-  upvote). We did not separate role-play from question wording.
+- Arms N and P ask different questions (probability of reaching 50 points vs each persona's wish to click and upvote).
+  The addendum's arm G asks P's question without personas; it did not settle how much of the gap comes from the
+  personas and how much from the question.
 - Our own pipeline ran the study. It has had one internal independent review and no outside reproduction.
 
 ## Licence
